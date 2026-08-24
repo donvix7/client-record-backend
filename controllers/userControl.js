@@ -29,18 +29,20 @@ const show = async (req, res, next) => {
 }
 
 const create = async (req, res, next) => {
-  
     try {
         const {firstName, lastName, email, phone} = req.body
-        
-        const userExists = await user.findOne({email, phone})
-        if(userExists){
-            return res.status(400).json({ success: false, message: "User with this email or phone already exists" })
+
+        const emailExists = await user.findOne({ email: email?.toLowerCase() })
+        if (emailExists) {
+            return res.status(400).json({ success: false, message: "A user with this email already exists" })
         }
+
+        const phoneExists = await user.findOne({ phone })
+        if (phoneExists) {
+            return res.status(400).json({ success: false, message: "A user with this phone number already exists" })
+        }
+
         const response = await user.create({firstName, lastName, email, phone})
-        if(!response){
-            return res.status(400).json({ success: false, message: "Failed to create user" })
-        }
         res.status(201).json({ success: true, message: "User created successfully", data: response })
     } catch (error) {
         next(error)
